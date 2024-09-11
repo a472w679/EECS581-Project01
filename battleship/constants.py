@@ -20,13 +20,14 @@ EMPTY_CELL = -1  # Represents an empty cell on the board.
 MISS_CELL = -2  # Represents a cell where an attack was made but no ship was hit.
 
 # Color information for displaying different game states
-SHIP_COLOR_INFO = "HIT = RED\nEMPTY CELL = BLUE\nMISSED SHOT = GREEN"  # Color legend to explain the state of cells on the board.
+SHIP_COLOR_INFO = "\nEMPTY = BLUE\nMISSED = GREEN\nHIT = RED"  # Color legend to explain the state of cells on the board.
 
 # Window dimensions
 WINDOW_WIDTH = 670  # Width of the game window in pixels.
 WINDOW_HEIGHT = 450  # Height of the game window in pixels.
 
 # Padding for board rendering
-BOARD_PADDING = 200  # Distance in pixels from the left edge of the window to where the board is drawn.
+BOARD_PADDING_LEFT = 200  # Distance in pixels from the left edge of the window to where the board is drawn.
+BOARD_PADDING_TOP  = 85   # Distance in pixels from the top edge of the window to where the board is drawn.
 
 # Ship size representation: Any other number than HIT_CELL, EMPTY_CELL, or MISS_CELL corresponds to the size of the ship placed in that cell.

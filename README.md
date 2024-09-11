@@ -14,7 +14,7 @@ In the battleship folder
 
 ## What to Add? 
 - [ ] Reorientation of ships while placing 
-- [ ] Denotation of cols and rows [a-j] and [1-10] respectively
+- [x] Denotation of cols and rows [a-j] and [1-10] respectively
 - [ ] Show what ships are left to be placed during place phase 
     - [ ] Player choosing a ship to be placed 
 

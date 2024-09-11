@@ -29,7 +29,9 @@ class Game:
         self.attack_phase = False  # Attack phase will activate once both players have placed their ships.
 
         # Game messages to display during different phases
-        self.message = "Enter Ship Number to play with (Min: 0, Max: 5)"  # Initial message for the ship selection phase.
+        self.message = "" # Used later for player turn information
+        self.title = "Enter Ship Number to Play with (Min: 1, Max: 5)"  # Initial message for the ship selection phase.
+        self.win_message = "" # The message to display when a player wins.
         self.last_move_message = ""  # Message for showing the result of the last move (hit/miss).
         self.secondary_message = ""  # Secondary message for additional information.
         self.color_info = SHIP_COLOR_INFO  # Display ship color legend/info.
@@ -83,9 +85,10 @@ class Game:
         if key > 0 and key <= 5:  # Ensure the ship count is between 1 and 5.
             self.player1.get_ships(key)  # Give Player 1 the specified number of ships.
             self.player2.get_ships(key)  # Give Player 2 the same number of ships.
-            self.message = "It is Player 1's turn to place their ships"  # Update the message to indicate the next phase.
+            self.message = "Player 1's Turn to Place Ships"  # Update the message to indicate the next phase.
             self.menu_phase = False  # Exit the menu phase.
             self.place_ship_phase = True  # Enter the ship placement phase.
+            self.title = "" # Remove title line from the screen
 
     def show_place_ship_phase(self):
         '''
@@ -94,7 +97,7 @@ class Game:
         Renderer.draw_board(self.player_lookup_table[self.turn].board, False)  # Draw the current player's board.
         self.get_placement(self.player_lookup_table[self.turn])  # Handle ship placement for the current player.
         if self.player1.ships_placed:  # If Player 1 has placed all ships:
-            self.message = "It is Player 2's turn to place their ships"  # Update the message for Player 2's turn.
+            self.message = "Player 2's Turn to Place Ships"  # Update the message for Player 2's turn.
             self.turn = 2  # Switch the turn to Player 2.
         else:
             self.turn = 1  # Otherwise, it's still Player 1's turn.
@@ -102,7 +105,7 @@ class Game:
         if self.player1.ships_placed and self.player2.ships_placed:  # Once both players have placed all ships:
             self.place_ship_phase = False  # Exit the ship placement phase.
             self.attack_phase = True  # Enter the attack phase.
-            self.secondary_message = "Press (B) to show own board"  # Display instruction for viewing the player's own board.
+            self.secondary_message = "Viewing ENEMY'S Board [B to Switch]"  # Display instruction for viewing the player's own board.
 
     def toggle_show_board(self):
         '''
@@ -111,10 +114,10 @@ class Game:
         key = get_key_pressed()  # Get the key pressed by the user.
         if key == ASCII_B:  # If the user presses the 'B' key:
             if self.show_own_board:  # If the player is currently viewing their own board:
-                self.secondary_message = "Press (B) to show own board"  # Update the message for viewing the enemy board.
+                self.secondary_message = "Viewing ENEMY'S Board [B to Switch]"  # Update the message for viewing the enemy board.
                 self.show_own_board = False  # Switch to viewing the enemy board.
             else:
-                self.secondary_message = "Viewing Own Board\n[Press B to view enemy]"  # Update the message for viewing own board.
+                self.secondary_message = "Viewing OWN Board [B to Switch]"  # Update the message for viewing own board.
                 self.show_own_board = True  # Switch to viewing own board.
 
     def show_attack_phase(self):
@@ -122,7 +125,7 @@ class Game:
         Manages the attack phase where players take turns attacking each other.
         '''
         self.toggle_show_board()  # Toggle the board view between the player's own and enemy's board.
-        self.message = f"It is Player {self.turn}'s turn to attack"  # Update the message to indicate whose turn it is.
+        self.message = f"Player {self.turn}'s Turn to Attack"  # Update the message to indicate whose turn it is.
 
         current_player = self.player_lookup_table[self.turn]  # Get the current attacking player.
         current_enemy_player = self.enemy_lookup_table[self.turn]  # Get the current enemy player.
@@ -134,7 +137,10 @@ class Game:
             Renderer.draw_board(current_enemy_player.board, True)  # Draw the enemy player's board.
             res = self.get_attack(current_player, current_enemy_player)  # Perform an attack if allowed.
             if current_enemy_player.is_loss():  # Check if the enemy has lost all their ships.
-                self.message = f"Player {self.turn} has won!"  # Declare the winner.
+                self.message = "" # Remove message from the UI.
+                self.last_move_message = "" # Remove the last move message from UI.
+                self.secondary_message = "" # Remove the secondary message from UI.
+                self.win_message = f"Player {self.turn} Has Won!"  # Declare the winner.
                 self.attack_phase = False  # End the attack phase.
 
             if res and self.turn == 1:
@@ -146,10 +152,12 @@ class Game:
         '''
         Draws informational messages below the game board.
         '''
-        draw_text(self.message, 150, 300, 20, BLACK)  # Draw the main message.
-        draw_text(self.last_move_message, 150, 320, 20, RED)  # Draw the last move message.
-        draw_text(self.secondary_message, 150, 340, 20, GREEN)  # Draw any secondary messages.
-        draw_text(self.color_info, 10, 10, 10, BLACK)  # Draw the ship color legend/info.
+        Renderer.draw_font_text(self.message, BOARD_PADDING_LEFT, 34, 22, BLACK) # draw turn-based message
+        Renderer.draw_font_text(self.title, 70, 225, 30, BLACK)  # Draw the main message.
+        Renderer.draw_font_text(self.win_message, 235, 225, 30, BLACK) # Draw the win message.
+        Renderer.draw_font_text(self.last_move_message, BOARD_PADDING_LEFT, 370, 20, RED)  # Draw the last move message.
+        Renderer.draw_font_text(self.secondary_message, BOARD_PADDING_LEFT, 395, 20, GREEN)  # Draw any secondary messages.
+        Renderer.draw_font_text(self.color_info, 10, 10, 15, BLACK)  # Draw the ship color legend/info.
 
     def game_loop(self):
         '''
