@@ -151,6 +151,16 @@ class Game:
         draw_text(self.secondary_message, 150, 340, 20, GREEN)  # Draw any secondary messages.
         draw_text(self.color_info, 10, 10, 10, BLACK)  # Draw the ship color legend/info.
 
+        i, j = Renderer.get_mouse_board_coordinates()
+        if i+1 >= 1 and i+1 <= 10 and j+1 >= 1 and j+1 <= 10: 
+            pass 
+        else: 
+            i = 0 
+            j = 0 
+            
+
+        draw_text(f"Position: {i+1}, {chr(ASCII_A+j)}", 10, 50, 10, BLACK)
+
     def game_loop(self):
         '''
         The main game loop. This function is continuously called to update the game state.
