@@ -1,17 +1,32 @@
-ASCII_A = 97 # chr(65) == "a"
-ASCII_0 = 48 # chr(48) == 0 
-ASCII_B = 66 # chr(98) == b
-CELL_SIZE = 28
+# Filename: constants.py
+# Description: This module defines the constants used across the Battleship game. These constants include ASCII values for key presses, cell sizes, game colors, and window dimensions.
+# Inputs: None
+# Output: Provides various constants to be used by other modules in the game.
+# Other sources for the code: ChatGPT (for proper commenting format)
+# Authors: Xavier and Andrew
+# Creation Date: 9th of September, 2024
 
-HIT_CELL = 0 
-EMPTY_CELL = -1 
-MISS_CELL = -2
+# ASCII values for specific key presses
+ASCII_A = 97  # ASCII value for 'a'. (chr(65) == 'a')
+ASCII_0 = 48  # ASCII value for '0'. (chr(48) == '0')
+ASCII_B = 66  # ASCII value for 'b'. (chr(98) == 'b')
 
+# Cell and board-related constants
+CELL_SIZE = 28  # The size of each cell in the Battleship game board in pixels.
 
-SHIP_COLOR_INFO = "HIT = RED\nEMPTY CELL = BLUE\nMISSED SHOT = GREEN"
+# Game cell status values
+HIT_CELL = 0  # Represents a cell that has been hit by an attack.
+EMPTY_CELL = -1  # Represents an empty cell on the board.
+MISS_CELL = -2  # Represents a cell where an attack was made but no ship was hit.
 
-WINDOW_WIDTH = 670 
-WINDOW_HEIGHT = 450
+# Color information for displaying different game states
+SHIP_COLOR_INFO = "HIT = RED\nEMPTY CELL = BLUE\nMISSED SHOT = GREEN"  # Color legend to explain the state of cells on the board.
 
-BOARD_PADDING = 200 # how far the board is drawn from the left window border 
-# any other number = ship size 
+# Window dimensions
+WINDOW_WIDTH = 670  # Width of the game window in pixels.
+WINDOW_HEIGHT = 450  # Height of the game window in pixels.
+
+# Padding for board rendering
+BOARD_PADDING = 200  # Distance in pixels from the left edge of the window to where the board is drawn.
+
+# Ship size representation: Any other number than HIT_CELL, EMPTY_CELL, or MISS_CELL corresponds to the size of the ship placed in that cell.
