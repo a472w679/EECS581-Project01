@@ -10,6 +10,7 @@ from pyray import *  # Import necessary functions from pyray for window and inpu
 from .renderer import Renderer  # Import the Renderer class for drawing the game board and window.
 from .player import Player  # Import the Player class that manages player-specific actions and state.
 from .constants import *  # Import necessary game constants like cell size, colors, etc.
+from .board import Orientation # Import Orientation enum for ship orientation.
 
 class Game:
     def __init__(self):
@@ -18,6 +19,7 @@ class Game:
         self.player1 = Player(1)  # Create Player 1.
         self.player2 = Player(2)  # Create Player 2.
         self.show_own_board = False  # Tracks whether the player is viewing their own board.
+        self.ship_orientation = Orientation.HORIZONTAL # Set intial ship orientation to horizontal.
 
         # Utility lookup tables for player and enemy references
         self.player_lookup_table = {1: self.player1, 2: self.player2}  # Maps turn number to the current player.
@@ -45,11 +47,18 @@ class Game:
         i, j = Renderer.get_mouse_board_coordinates()  # Get mouse cursor coordinates on the board.
 
         if is_mouse_button_pressed(MouseButton.MOUSE_BUTTON_LEFT):  # Check if the left mouse button was clicked.
-            res = player.place_ship(i, j, player.ships[-1])  # Attempt to place the player's last remaining ship at the coordinates.
+            res = player.place_ship(i, j, player.ships[-1], self.ship_orientation)  # Attempt to place the player's last remaining ship at the coordinates.
             if not res:
                 self.last_move_message = "Not a correct placement!"  # If the placement failed, show an error message.
             else:
+                self.last_move_message = "" # Reset the last move message.
                 player.ships.pop()  # Remove the placed ship from the player's list.
+        
+        if is_mouse_button_pressed(MouseButton.MOUSE_BUTTON_RIGHT): # Check if right mouse button was clicked.
+            if (self.ship_orientation is Orientation.HORIZONTAL): # Check if orientation is currently horizontal
+                self.ship_orientation = Orientation.VERTICAL # If horizontal, go vertical
+            else:
+                self.ship_orientation = Orientation.HORIZONTAL # Otherwise, go horizontal (flip)
 
         # If all ships have been placed, mark the player as finished placing ships.
         if not player.ships:
@@ -94,8 +103,9 @@ class Game:
         '''
         Manages the ship placement phase.
         '''
-        Renderer.draw_board(self.player_lookup_table[self.turn].board, False)  # Draw the current player's board.
-        self.get_placement(self.player_lookup_table[self.turn])  # Handle ship placement for the current player.
+        current_player = self.player_lookup_table[self.turn] # Get current player
+        Renderer.draw_board(current_player.board, False, current_player.ships[-1], self.ship_orientation)  # Draw the current player's board.
+        self.get_placement(current_player)  # Handle ship placement for the current player.
         if self.player1.ships_placed:  # If Player 1 has placed all ships:
             self.message = "Player 2's Turn to Place Ships"  # Update the message for Player 2's turn.
             self.turn = 2  # Switch the turn to Player 2.

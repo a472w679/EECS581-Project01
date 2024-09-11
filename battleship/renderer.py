@@ -8,6 +8,7 @@
 
 from pyray import *  # Importing all the necessary functions from the pyray module, used for rendering.
 from .constants import *  # Importing all the constants needed for game logic like cell size, colors, etc.
+from .board import Orientation # Importing Orientation enum for ship handling.
 
 class Renderer:
     # Only one renderer, so we make the methods static
@@ -43,7 +44,7 @@ class Renderer:
         return (i, j)  # Return the row and column indices as a tuple.
 
     @staticmethod
-    def draw_board(board, is_other_player):
+    def draw_board(board, is_other_player, ship_length = 1, ship_orientation = None):
         '''
         Draws the game board on the screen.
         - The visual appearance of each cell depends on its state (empty, hit, miss, or contains a ship).
@@ -85,9 +86,13 @@ class Renderer:
 
         # Draw the mouse cursor overlay on the board if it's over a valid cell
         i, j = Renderer.get_mouse_board_coordinates()  # Get the mouse's board coordinates.
-        if board.is_valid_cell(i, j):  # Check if the mouse is over a valid cell.
-            # Highlight the cell under the mouse cursor with a semi-transparent yellow overlay.
-            draw_rectangle(BOARD_PADDING_LEFT + j * CELL_SIZE + 3, BOARD_PADDING_TOP + i * CELL_SIZE + 3, CELL_SIZE - 6, CELL_SIZE - 6, Color(255, 255, 0, 100))
+        for k in range(ship_length):
+            checkX = j + k * (ship_orientation != Orientation.VERTICAL)
+            checkY = i + k * (ship_orientation == Orientation.VERTICAL)
+
+            if board.is_valid_cell(checkY, checkX):  # Check if the mouse is over a valid cell.
+                # Highlight the cell under the mouse cursor with a semi-transparent yellow overlay.
+                draw_rectangle(BOARD_PADDING_LEFT + checkX * CELL_SIZE + 3, BOARD_PADDING_TOP + checkY * CELL_SIZE + 3, CELL_SIZE - 6, CELL_SIZE - 6, Color(255, 255, 0, 100))
 
     @staticmethod
     def draw_window(game):
