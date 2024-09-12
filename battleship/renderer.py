@@ -9,11 +9,11 @@
 from pyray import *  # Importing all the necessary functions from the pyray module, used for rendering.
 from .constants import *  # Importing all the constants needed for game logic like cell size, colors, etc.
 from .board import Orientation # Importing Orientation enum for ship handling.
+import random  # importing the random module  for ship colors
 
 class Renderer:
     # Only one renderer, so we make the methods static
     font = None
-
     @staticmethod
     def draw_font_text(text, posX, posY, fontSize, color):
         '''
@@ -43,14 +43,38 @@ class Renderer:
 
         return (i, j)  # Return the row and column indices as a tuple.
 
+    @staticmethod
+    def draw_remaining_ships_to_place(player): 
+        '''
+        Draws the  ships the player has left to place in the info margins 
+        '''
+        cell_ship_size = 20
+        draw_text_ex(Renderer.font, f"Player{player.num} Ships", Vector2(10, 130), 20, 1.0, Color(0, 200, 255, 255))
+        draw_line(10, 150, 140, 150, BLACK)
+        for i, ship in enumerate(player.ships): # iterate over each ship 
+            for j in range(ship): # draw each ship cell corresponding to its size 
+                ship_color = BLACK 
+                if ship == player.ships[-1]: # if current ship that is drawn is the one to be placed by player 
+                    ship_color = Color(0, 200, 255, 255)  # cyan 
+                    
+
+                draw_rectangle_lines(10 + j * (cell_ship_size  + 2) , 180 + i * 25, cell_ship_size, cell_ship_size, ship_color) # draw cell 
+
     @staticmethod 
-    def draw_row_and_col_numbers(board): 
-        for i in range(len(board.cells)): 
-            draw_text(str(i+1), BOARD_PADDING - 20, i * CELL_SIZE + CELL_SIZE // 3, 8, BLACK)
+    def draw_ship_placement_hover(board, ship_length, ship_orientation): 
+        # Draw the mouse cursor overlay on the board if it's over a valid cell
+        i, j = Renderer.get_mouse_board_coordinates()  # Get the mouse's board coordinates.
+        for k in range(ship_length):
+            checkX = j + k * (ship_orientation != Orientation.VERTICAL)
+            checkY = i + k * (ship_orientation == Orientation.VERTICAL)
 
-        for j in range(len(board.cells[0])): 
-            draw_text(str(chr(ASCII_A+j)), BOARD_PADDING + 10 + CELL_SIZE * j, board.rows * CELL_SIZE + 5, 8, BLACK)
-
+            is_ship_placeable = board.is_placeable_on(i, j, ship_length, ship_orientation)
+            if not is_ship_placeable and board.is_valid_cell(i, j) and ship_length != 1:  # if it is not a placeable ship but mouse is over a valid cell, draw the hover red
+                if checkX < board.rows and checkY < board.cols: 
+                    draw_rectangle(BOARD_PADDING_LEFT + checkX * CELL_SIZE + 3, BOARD_PADDING_TOP + checkY * CELL_SIZE + 3, CELL_SIZE - 6, CELL_SIZE - 6, Color(220, 20, 60, 100))
+            elif board.is_valid_cell(i, j):  # Check if the mouse is over a valid cell.
+                # Highlight the cell under the mouse cursor with a semi-transparent yellow overlay.
+                draw_rectangle(BOARD_PADDING_LEFT + checkX * CELL_SIZE + 3, BOARD_PADDING_TOP + checkY * CELL_SIZE + 3, CELL_SIZE - 6, CELL_SIZE - 6, Color(143,188,143, 100))
 
 
     @staticmethod
@@ -69,7 +93,6 @@ class Renderer:
             Renderer.draw_font_text(str(i + 1), BOARD_PADDING_LEFT + i * CELL_SIZE + 8, BOARD_PADDING_TOP - 20, 20, BLACK)
 
         # Iterate over each row and cell in the board
-        Renderer.draw_row_and_col_numbers(board)
         for i, row in enumerate(board.cells):
 
             row_letter = chr(ASCII_A + i).upper() # Get the row letter in uppercase
@@ -92,18 +115,12 @@ class Renderer:
                         cell_color = GRAY  # For the player's ships, display them in GRAY.
 
                 # Draw the border and fill the cell with the determined color
-                draw_rectangle_lines(BOARD_PADDING_LEFT + j * CELL_SIZE, BOARD_PADDING_TOP + i * CELL_SIZE, CELL_SIZE, CELL_SIZE, BLACK)  # Draw the cell border.
+                # draw_rectangle_lines(BOARD_PADDING_LEFT + j * CELL_SIZE, BOARD_PADDING_TOP + i * CELL_SIZE, CELL_SIZE, CELL_SIZE, BLACK)  # Draw the cell border.
+                cell = Rectangle(BOARD_PADDING_LEFT + j * CELL_SIZE, BOARD_PADDING_TOP + i * CELL_SIZE, CELL_SIZE, CELL_SIZE)
+                draw_rectangle_lines_ex(cell, 1.5, BLACK)
                 draw_rectangle(BOARD_PADDING_LEFT + j * CELL_SIZE + 3, BOARD_PADDING_TOP + i * CELL_SIZE + 3, CELL_SIZE - 6, CELL_SIZE - 6, cell_color)  # Fill the cell with the color.
 
-        # Draw the mouse cursor overlay on the board if it's over a valid cell
-        i, j = Renderer.get_mouse_board_coordinates()  # Get the mouse's board coordinates.
-        for k in range(ship_length):
-            checkX = j + k * (ship_orientation != Orientation.VERTICAL)
-            checkY = i + k * (ship_orientation == Orientation.VERTICAL)
-
-            if board.is_valid_cell(checkY, checkX):  # Check if the mouse is over a valid cell.
-                # Highlight the cell under the mouse cursor with a semi-transparent yellow overlay.
-                draw_rectangle(BOARD_PADDING_LEFT + checkX * CELL_SIZE + 3, BOARD_PADDING_TOP + checkY * CELL_SIZE + 3, CELL_SIZE - 6, CELL_SIZE - 6, Color(255, 255, 0, 100))
+            Renderer.draw_ship_placement_hover(board, ship_length, ship_orientation)
 
     @staticmethod
     def draw_window(game):

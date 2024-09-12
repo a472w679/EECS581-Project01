@@ -25,7 +25,6 @@ class Board:
         self.cols = cols  # Number of columns on the board.
         self.cells = [[-1] * rows for _ in range(cols)]  # Initialize a 2D list of cells, all set to -1 (EMPTY_CELL).
 
-    
     def is_valid_cell(self, i, j):
         '''
         Checks if the specified cell (i, j) is within the valid bounds of the board.

@@ -168,16 +168,8 @@ class Game:
         Renderer.draw_font_text(self.last_move_message, BOARD_PADDING_LEFT, 370, 20, RED)  # Draw the last move message.
         Renderer.draw_font_text(self.secondary_message, BOARD_PADDING_LEFT, 395, 20, GREEN)  # Draw any secondary messages.
         Renderer.draw_font_text(self.color_info, 10, 10, 15, BLACK)  # Draw the ship color legend/info.
-
-        i, j = Renderer.get_mouse_board_coordinates()
-        if i+1 >= 1 and i+1 <= 10 and j+1 >= 1 and j+1 <= 10: 
-            pass 
-        else: 
-            i = 0 
-            j = 0 
-            
-
-        draw_text(f"Position: {i+1}, {chr(ASCII_A+j)}", 10, 50, 10, BLACK)
+        if self.place_ship_phase: 
+            Renderer.draw_remaining_ships_to_place(self.player_lookup_table[self.turn])
 
     def game_loop(self):
         '''
