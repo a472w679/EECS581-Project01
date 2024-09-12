@@ -18,9 +18,10 @@ CELL_SIZE = 28  # The size of each cell in the Battleship game board in pixels.
 HIT_CELL = 0  # Represents a cell that has been hit by an attack.
 EMPTY_CELL = -1  # Represents an empty cell on the board.
 MISS_CELL = -2  # Represents a cell where an attack was made but no ship was hit.
+SUNK_CELL = -3 # Represents a cell where a ship has no cells left of itself
 
 # Color information for displaying different game states
-SHIP_COLOR_INFO = "RIGHT-CLICK = ROTATE\n\nEMPTY = WHITE\nMISSED = GREEN\nHIT = RED"  # Color legend to explain the state of cells on the board.
+SHIP_COLOR_INFO = "RIGHT-CLICK = ROTATE\n\nEMPTY = WHITE\nMISSED = GREEN\nHIT = RED\nSUNK = YELLOW"  # Color legend to explain the state of cells on the board.
 
 # Window dimensions
 WINDOW_WIDTH = 670  # Width of the game window in pixels.

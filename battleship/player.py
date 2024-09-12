@@ -22,6 +22,8 @@ class Player:
         """
         self.num = num  # The player number is stored in the instance variable.
         self.ships = []  # Empty list to hold the player's ships.
+        self.ship_count = {} # size of ship is the key, num of cells left of ship is the value 
+        self.ship_hits = {} # size of ship is the key, (coordinate is the value) , we use this to store ship locations that have been hit 
         self.num_ship_cells = 0  # Total number of cells occupied by ships, initialized to 0.
         self.board = Board()  # Initializes a new Board instance for the player.
         self.ships_placed = False  # Indicates if ships have been placed, initialized to False.
@@ -35,6 +37,10 @@ class Player:
         """
         self.ships = [i for i in range(1, num + 1)]  # Create ships with sizes from 1 to 'num'.
         self.num_ship_cells = sum(self.ships)  # Calculate total number of cells that the ships occupy.
+
+        for i in range(1, num+1): 
+            self.ship_count[i] = i # sets the ship count for ship to how large it is 
+            self.ship_hits[i] = [] # initializes an empty list for ship hits for size i 
 
     def place_ship(self, i, j, ship_size, orientation = Orientation.HORIZONTAL):
         '''
@@ -56,22 +62,45 @@ class Player:
             return True  # Ship placement was successful.
         return False  # Ship placement failed.
 
+    def change_cells_to_sunk(self, sunk_ship_size): 
+        '''
+        Changes the ship cells that now should be sunk to a SUNK_CELL
+        - sunk_ship_size: the size of the ship that was sunk
+        '''
+        # loop over ship_hits dict to make the sunk ship a sunk cell 
+        for i, j in self.ship_hits[sunk_ship_size]: 
+            self.board.cells[i][j] = SUNK_CELL
+
+
+
     def place_attack(self, i, j):
         '''
         Places an attack on the player's board.
         - i: Row index where the attack occurs.
         - j: Column index where the attack occurs.
-        - Returns True if the attack hits a ship, False otherwise.
+        - Returns True if the attack hits a ship, False otherwise. Also returns ship_size if hit 
         '''
         if self.board.is_ship(i, j):  # Check if there is a ship at (i, j).
             # Attack hits a ship, mark the cell as a hit.
-            self.board.cells[i][j] = HIT_CELL  # Mark the cell with HIT_CELL constant.
+
+            # update player ships status 
+            ship_size = self.board.cells[i][j]
+            self.ship_count[ship_size] -= 1  # decrease the count of the ship that was hit 
             self.num_ship_cells -= 1  # Decrease the count of ship cells after a hit.
-            return True  # Attack was a hit.
+            self.ship_hits[ship_size].append((i, j)) 
+
+            # now we can change the board 
+            # if the attack sunk a ship we put it as a sunk cell 
+            if self.ship_count[ship_size] == 0: 
+                self.change_cells_to_sunk(ship_size)
+            else: 
+                self.board.cells[i][j] = HIT_CELL  # Mark the cell with HIT_CELL constant.
+
+            return True, ship_size  # Attack was a hit.
         else:
             # Attack misses, mark the cell as a miss.
             self.board.cells[i][j] = MISS_CELL  # Mark the cell with MISS_CELL constant.
-            return False  # Attack was a miss.
+            return False, -1  # Attack was a miss.
 
     def is_loss(self):
         """

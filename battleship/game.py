@@ -29,6 +29,7 @@ class Game:
         self.menu_phase = True  # Start the game in the menu phase.
         self.place_ship_phase = False  # Ship placement phase will activate after the menu.
         self.attack_phase = False  # Attack phase will activate once both players have placed their ships.
+        self.game_end_phase = False # Game end phase will show the board that lost and their sunk ships 
 
         # Game messages to display during different phases
         self.message = "" # Used later for player turn information
@@ -76,8 +77,10 @@ class Game:
         i, j = Renderer.get_mouse_board_coordinates()  # Get mouse cursor coordinates on the enemy's board.
         if is_mouse_button_pressed(MouseButton.MOUSE_BUTTON_LEFT):  # Check if the left mouse button was clicked.
             if enemy.board.is_valid_cell(i, j):  # Ensure the clicked cell is valid for an attack.
-                res = enemy.place_attack(i, j)  # Perform the attack on the enemy's board.
-                if res:
+                res, ship_size = enemy.place_attack(i, j)  # Perform the attack on the enemy's board.
+                if res and enemy.ship_count[ship_size] == 0: 
+                    self.last_move_message = f"Player {player.num} has sunk a ship!"  # Notifys the player that they sunk a ship.
+                elif res:
                     self.last_move_message = f"Player {player.num} has hit a ship!"  # Notifys the player of a successful hit.
                 else:
                     self.last_move_message = f"Player {player.num} has missed!"  # Notifys the player of a miss.
@@ -152,21 +155,28 @@ class Game:
                 self.secondary_message = "" # Remove the secondary message from UI.
                 self.win_message = f"Player {self.turn} Has Won!"  # Declare the winner.
                 self.attack_phase = False  # End the attack phase.
+                self.game_end_phase = True  # Set phase to game end 
+                return 
 
             if res and self.turn == 1:
                 self.turn = 2  # Switch turns if Player 1 attacked.
             elif res and self.turn == 2:
                 self.turn = 1  # Switch turns if Player 2 attacked.
 
+    def show_game_end_phase(self): 
+        losing_player = self.enemy_lookup_table[self.turn]
+        Renderer.draw_board(losing_player.board, True)
+
     def draw_info_messages(self):
         '''
         Draws informational messages below the game board.
         '''
-        Renderer.draw_font_text(self.message, BOARD_PADDING_LEFT, 34, 22, BLACK) # draw turn-based message
+        turn_message_color = BLUE if self.turn == 1 else GREEN
+        Renderer.draw_font_text(self.message, BOARD_PADDING_LEFT, 34, 22, turn_message_color) # draw turn-based message
         Renderer.draw_font_text(self.title, 70, 225, 30, BLACK)  # Draw the main message.
-        Renderer.draw_font_text(self.win_message, 235, 225, 30, BLACK) # Draw the win message.
+        Renderer.draw_font_text(self.win_message, 235, 370, 30, turn_message_color) # Draw the win message.
         Renderer.draw_font_text(self.last_move_message, BOARD_PADDING_LEFT, 370, 20, RED)  # Draw the last move message.
-        Renderer.draw_font_text(self.secondary_message, BOARD_PADDING_LEFT, 395, 20, GREEN)  # Draw any secondary messages.
+        Renderer.draw_font_text(self.secondary_message, BOARD_PADDING_LEFT, 395, 20, turn_message_color)  # Draw any secondary messages.
         Renderer.draw_font_text(self.color_info, 10, 10, 15, BLACK)  # Draw the ship color legend/info.
         if self.place_ship_phase: 
             Renderer.draw_remaining_ships_to_place(self.player_lookup_table[self.turn])
@@ -182,3 +192,6 @@ class Game:
             self.show_place_ship_phase()  # Show the ship placement phase.
         elif self.attack_phase:
             self.show_attack_phase()  # Show the attack phase.
+        elif self.game_end_phase: 
+            self.show_game_end_phase()
+

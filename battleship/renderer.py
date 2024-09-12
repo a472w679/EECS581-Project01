@@ -103,10 +103,13 @@ class Renderer:
                 cell_color = WHITE  # Default cell color is BLUE.
                 if cell == EMPTY_CELL:  # If the cell is empty, set the color to BLUE.
                     cell_color = WHITE
+                elif cell == SUNK_CELL: 
+                    cell_color = Color(249,182,78, 255)  # yellowish color 
                 elif cell == HIT_CELL:  # If the cell has been hit, set the color to RED.
                     cell_color = RED
                 elif cell == MISS_CELL:  # If the attack missed, set the color to GREEN.
                     cell_color = GREEN
+ 
                 elif cell > 0:  # If the cell contains part of a ship.
                     # Display ship cells based on whether it's an enemy board.
                     if is_other_player:
