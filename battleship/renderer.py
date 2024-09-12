@@ -43,6 +43,16 @@ class Renderer:
 
         return (i, j)  # Return the row and column indices as a tuple.
 
+    @staticmethod 
+    def draw_row_and_col_numbers(board): 
+        for i in range(len(board.cells)): 
+            draw_text(str(i+1), BOARD_PADDING - 20, i * CELL_SIZE + CELL_SIZE // 3, 8, BLACK)
+
+        for j in range(len(board.cells[0])): 
+            draw_text(str(chr(ASCII_A+j)), BOARD_PADDING + 10 + CELL_SIZE * j, board.rows * CELL_SIZE + 5, 8, BLACK)
+
+
+
     @staticmethod
     def draw_board(board, is_other_player, ship_length = 1, ship_orientation = None):
         '''
@@ -59,6 +69,7 @@ class Renderer:
             Renderer.draw_font_text(str(i + 1), BOARD_PADDING_LEFT + i * CELL_SIZE + 8, BOARD_PADDING_TOP - 20, 20, BLACK)
 
         # Iterate over each row and cell in the board
+        Renderer.draw_row_and_col_numbers(board)
         for i, row in enumerate(board.cells):
 
             row_letter = chr(ASCII_A + i).upper() # Get the row letter in uppercase
@@ -66,9 +77,9 @@ class Renderer:
 
             for j, cell in enumerate(row):
                 # Determine the color of the cell based on its state
-                cell_color = BLUE  # Default cell color is BLUE.
+                cell_color = WHITE  # Default cell color is BLUE.
                 if cell == EMPTY_CELL:  # If the cell is empty, set the color to BLUE.
-                    cell_color = BLUE
+                    cell_color = WHITE
                 elif cell == HIT_CELL:  # If the cell has been hit, set the color to RED.
                     cell_color = RED
                 elif cell == MISS_CELL:  # If the attack missed, set the color to GREEN.
@@ -76,7 +87,7 @@ class Renderer:
                 elif cell > 0:  # If the cell contains part of a ship.
                     # Display ship cells based on whether it's an enemy board.
                     if is_other_player:
-                        cell_color = BLUE  # For enemy ships, keep the cell color BLUE (hidden).
+                        cell_color = WHITE  # For enemy ships, keep the cell color BLUE (hidden).
                     else:
                         cell_color = GRAY  # For the player's ships, display them in GRAY.
 
