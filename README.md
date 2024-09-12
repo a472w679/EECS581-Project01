@@ -16,8 +16,11 @@ In the battleship folder
 - [x] Reorientation of ships while placing 
 - [x] Denotation of cols and rows [a-j] and [1-10] respectively
 - [X] Show what ships are left to be placed during place phase 
-    - [ ] Player choosing what ship to place 
 - [X] Tell attacker when their attack sunk a ship
+- [X] Fix bug where player can attack a cell that they already hit or missed 
+
+# Additional Quality of Life Additions  
+- [ ] Player can choose what ship to place 
 - [ ] Let player restart the game 
-- [ ] Fix bug where player can attack a cell that they already hit or missed 
+- [ ] Show both boards at end game screen
 

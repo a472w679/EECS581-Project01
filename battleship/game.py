@@ -78,6 +78,10 @@ class Game:
         if is_mouse_button_pressed(MouseButton.MOUSE_BUTTON_LEFT):  # Check if the left mouse button was clicked.
             if enemy.board.is_valid_cell(i, j):  # Ensure the clicked cell is valid for an attack.
                 res, ship_size = enemy.place_attack(i, j)  # Perform the attack on the enemy's board.
+                if ship_size == MISS_CELL: # player chose a cell they already missed/hit/sunk  
+                    self.last_move_message = f"Player {player.num} already shot as this cell!"
+                    return False 
+
                 if res and enemy.ship_count[ship_size] == 0: 
                     self.last_move_message = f"Player {player.num} has sunk a ship!"  # Notifys the player that they sunk a ship.
                 elif res:

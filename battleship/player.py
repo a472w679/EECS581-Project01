@@ -80,6 +80,11 @@ class Player:
         - j: Column index where the attack occurs.
         - Returns True if the attack hits a ship, False otherwise. Also returns ship_size if hit 
         '''
+        # if this cell has already been interacted with we need to inform the game not to change turns 
+        if self.board.cells[i][j] == SUNK_CELL or self.board.cells[i][j] == HIT_CELL or self.board.cells[i][j] == MISS_CELL: 
+            return False, MISS_CELL # return False and tell game that the user needs to choose another valid cell 
+
+
         if self.board.is_ship(i, j):  # Check if there is a ship at (i, j).
             # Attack hits a ship, mark the cell as a hit.
 
@@ -100,7 +105,7 @@ class Player:
         else:
             # Attack misses, mark the cell as a miss.
             self.board.cells[i][j] = MISS_CELL  # Mark the cell with MISS_CELL constant.
-            return False, -1  # Attack was a miss.
+            return False, EMPTY_CELL  # Attack was a miss and previous cell was an empty cell.
 
     def is_loss(self):
         """
