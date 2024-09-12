@@ -7,6 +7,7 @@
 # Creation Date: 9th of September, 2024
 
 from .board import Board  # Importing the Board class from the current package.
+from .board import Orientation
 from .constants import *  # Importing all constants like HIT_CELL and MISS_CELL used for game logic.
 
 class Player:
@@ -35,7 +36,7 @@ class Player:
         self.ships = [i for i in range(1, num + 1)]  # Create ships with sizes from 1 to 'num'.
         self.num_ship_cells = sum(self.ships)  # Calculate total number of cells that the ships occupy.
 
-    def place_ship(self, i, j, ship_size):
+    def place_ship(self, i, j, ship_size, orientation = Orientation.HORIZONTAL):
         '''
         Places a ship on the player's board.
         - i: Row index where the ship starts.
@@ -43,10 +44,15 @@ class Player:
         - ship_size: The size of the ship to place.
         - Returns True if the ship is successfully placed, False otherwise.
         '''
-        if self.board.is_placeable_on(i, j, ship_size):  # Check if the ship can be placed at (i, j).
+        if self.board.is_placeable_on(i, j, ship_size, orientation):  # Check if the ship can be placed at (i, j).
+            stepX = orientation == Orientation.HORIZONTAL # X step is 1 if horizontal, 0 otherwise.
+            stepY = orientation == Orientation.VERTICAL   # Y step is 1 if vertical  , 0 otherwise.
+
             # Place the ship by marking the cells occupied by the ship on the board.
             for pos in range(ship_size):
-                self.board.cells[i][j + pos] = ship_size  # Mark the cells with the ship size.
+                setX = j + pos * stepX # Calculate the X position to set.
+                setY = i + pos * stepY # Calculate the Y position to set.
+                self.board.cells[setY][setX] = ship_size  # Mark the cells with the ship size.
             return True  # Ship placement was successful.
         return False  # Ship placement failed.
 

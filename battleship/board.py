@@ -5,6 +5,12 @@
 # Other sources for the code: ChatGPT(for proper commenting format).
 # Authors: Xavier and Andrew
 # Creation Date: 9th of September, 2024
+from enum import Enum
+
+class Orientation(Enum):
+    '''Orientation enumeration for ship orientation'''
+    HORIZONTAL = 0 # Ship is horizontal
+    VERTICAL   = 1 # Ship is vertical
 
 class Board:
     def __init__(self, rows=10, cols=10):
@@ -31,7 +37,7 @@ class Board:
         '''
         return i >= 0 and i < self.rows and j >= 0 and j < self.cols  # Return True if both row and column indices are valid.
 
-    def is_placeable_on(self, i, j, ship_size):
+    def is_placeable_on(self, i, j, ship_size, orientation = Orientation.HORIZONTAL):
         '''
         Determines if a ship of the given size can be placed at the specified location (i, j).
         Args:
@@ -41,14 +47,19 @@ class Board:
         Returns:
             True if the ship can be placed on the board at the given position, otherwise False.
         '''
-        # Check if the starting cell is valid and the ship can fit within the remaining columns.
-        if self.is_valid_cell(i, j) and (ship_size + j - 1) < self.cols:
-            # Iterate over the cells the ship will occupy to check if they are empty.
-            for x in range(ship_size):
-                if self.cells[i][j + x] != -1:  # If any cell is not empty, return False (ship cannot be placed).
-                    return False
-        else:
-            return False  # Return False if the initial position or the ship size goes out of bounds.
+        stepX = orientation == Orientation.HORIZONTAL # X step is 1 if horizontal, 0 otherwise.
+        stepY = orientation == Orientation.VERTICAL   # Y step is 1 if vertical  , 0 otherwise.
+
+        # Iterate over the cells the ship will occupy to check if they are empty.
+        for x in range(ship_size):
+            checkX = j + x * stepX # Calculate the X position to set.
+            checkY = i + x * stepY # Calculate the Y position to set.
+
+            if not self.is_valid_cell(checkY, checkX): # Check if current cell is in grid
+                return False # Return false if not in grid
+
+            if self.cells[checkY][checkX] != -1:  # If any cell is not empty, return False (ship cannot be placed).
+                return False
 
         return True  # Return True if the ship can be placed successfully.
 
