@@ -1,0 +1,7 @@
+1. 3x3 shot
+2. 1x10 shot
+3. 7 1x1 shots
+4. 10 random 1x1 shots
+5. reveal 2x6
+
+Every 4 turns you get option between 2 random powerups.
