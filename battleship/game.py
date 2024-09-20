@@ -19,6 +19,8 @@ class Game:
         self.player1 = Player(1)  # Create Player 1.
         self.player2 = Player(2)  # Create Player 2.
         self.show_own_board = False  # Tracks whether the player is viewing their own board.
+        self.is_ai = False # PvP or vs-AI
+        self.ai_level = 0 # Tracks whether the ai is easy AI (0), medium AI (1), or hard AI (2)
         self.ship_orientation = Orientation.HORIZONTAL # Set intial ship orientation to horizontal.
 
         # Utility lookup tables for player and enemy references
