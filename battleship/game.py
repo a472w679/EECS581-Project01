@@ -88,6 +88,8 @@ class Game:
                     self.last_move_message = f"Player {player.num} has hit a ship!"  # Notifys the player of a successful hit.
                 else:
                     self.last_move_message = f"Player {player.num} has missed!"  # Notifys the player of a miss.
+                coord = chr(ord("A") + i) + str(j+1)
+                self.last_move_message += " " + coord
 
                 return True
 
