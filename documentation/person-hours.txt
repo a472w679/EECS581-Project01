@@ -1,0 +1,2 @@
+Christopher Gronewold - 3 hours
+  I added the structure to the code to handle playing against an AI. I added that and the easy AI difficulty logic.
