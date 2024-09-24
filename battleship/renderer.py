@@ -60,6 +60,39 @@ class Renderer:
 
                 draw_rectangle_lines(10 + j * (cell_ship_size  + 2) , 180 + i * 25, cell_ship_size, cell_ship_size, ship_color) # draw cell 
 
+    @staticmethod
+    def draw_ai_buttons(ai_level): 
+        '''
+        Draws the  buttons that player can press to select an AI level
+        '''
+        button_size = 50
+        pos = get_mouse_position()  # Get the mouse position from pyray.
+        pushed_index = ai_level + 1 # Get the index of the button that is pushed
+        button_labels = ["PvP", "Easy", "Med", "Hard"]
+
+        # Looping over the 4 buttons
+        for i in range(4):
+            x = int(WINDOW_WIDTH/2 - (2 - i)*(button_size))    # x position of button
+            cell = Rectangle(x, 275, button_size, button_size) # bounding box of button
+            draw_rectangle_lines_ex(cell, 3, BLACK)            # draw black outline of button
+
+            # If mouse is hovering over button, shade it yellow
+            if (pos.x > x and pos.x < x + button_size and pos.y > 275 and pos.y < 275 + button_size):
+                draw_rectangle(x+6, 275+6, button_size-12, button_size-12, Color(143,188,143, 100))
+
+                # If the left button is clicked on this frame, this button has been pushed
+                if is_mouse_button_pressed(MouseButton.MOUSE_BUTTON_LEFT):  # Check if the left mouse button was clicked.
+                    pushed_index = i
+
+            # If button is selected, shade it gray
+            if (i == pushed_index):
+                draw_rectangle(x + 6, 275 + 6, button_size - 12, button_size - 12, Color(160, 160, 160, 255))
+
+            Renderer.draw_font_text(button_labels[i], x+8, 290, 20, BLACK) # Draw the row letter
+        return pushed_index - 1 # Convert the pushed button index into the selected AI level
+
+
+
     @staticmethod 
     def draw_ship_placement_hover(board, ship_length, ship_orientation): 
         # Draw the mouse cursor overlay on the board if it's over a valid cell
@@ -90,7 +123,7 @@ class Renderer:
         # Iterate over each col in the board
         for i in range(board.cols):
             # Draw the column numbers above the columns of the board
-            Renderer.draw_font_text(str(i + 1), BOARD_PADDING_LEFT + i * CELL_SIZE + 8, BOARD_PADDING_TOP - 20, 20, BLACK)
+            Renderer.draw_font_text(str(i + 1), BOARD_PADDING_LEFT + i * CELL_SIZE + 8, BOARD_PADDING_TOP - 20, 20, BLACK, 0)
 
         # Iterate over each row and cell in the board
         for i, row in enumerate(board.cells):

@@ -20,7 +20,7 @@ class Game:
         self.player2 = Player(2)  # Create Player 2.
         self.show_own_board = False  # Tracks whether the player is viewing their own board.
         self.is_ai = False # PvP or vs-AI
-        self.ai_level = 0 # Tracks whether the ai is easy AI (0), medium AI (1), or hard AI (2)
+        self.ai_level = -1 # Tracks whether the ai is easy AI (0), medium AI (1), or hard AI (2). Otherwise (-1)
         self.ship_orientation = Orientation.HORIZONTAL # Set intial ship orientation to horizontal.
 
         # Utility lookup tables for player and enemy references
@@ -181,13 +181,16 @@ class Game:
         '''
         turn_message_color = BLUE if self.turn == 1 else GREEN
         Renderer.draw_font_text(self.message, BOARD_PADDING_LEFT, 34, 22, turn_message_color) # draw turn-based message
-        Renderer.draw_font_text(self.title, 70, 225, 30, BLACK)  # Draw the main message.
+        Renderer.draw_font_text(self.title, 70, 175, 30, BLACK)  # Draw the main message.
         Renderer.draw_font_text(self.win_message, 235, 370, 30, turn_message_color) # Draw the win message.
         Renderer.draw_font_text(self.last_move_message, BOARD_PADDING_LEFT, 370, 20, RED)  # Draw the last move message.
         Renderer.draw_font_text(self.secondary_message, BOARD_PADDING_LEFT, 395, 20, turn_message_color)  # Draw any secondary messages.
         Renderer.draw_font_text(self.color_info, 10, 10, 15, BLACK)  # Draw the ship color legend/info.
         if self.place_ship_phase: 
             Renderer.draw_remaining_ships_to_place(self.player_lookup_table[self.turn])
+        elif self.menu_phase:
+            self.ai_level = Renderer.draw_ai_buttons(self.ai_level)
+            self.is_ai = (self.ai_level > -1)
 
     def game_loop(self):
         '''
