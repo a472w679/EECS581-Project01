@@ -256,7 +256,7 @@ class Game:
 
                 # Give the opponent powerup choices every fourth turn
                 if (self.turn_count // 2) % 4 == 3:
-                    current_enemy_player.draw_powerup_options()
+                    current_enemy_player.get_new_powerup_options()
                 else:
                     current_enemy_player.powerup_options = []
 
@@ -279,7 +279,7 @@ class Game:
         Renderer.draw_font_text(self.secondary_message, BOARD_PADDING_LEFT, 395, 20, turn_message_color)  # Draw any secondary messages.
         Renderer.draw_font_text(self.color_info, 10, 10, 15, BLACK)  # Draw the ship color legend/info.
 
-        player = self.player_lookup_table[self.turn]
+        player = self.player_lookup_table[self.turn] # The player currently playing
         if self.place_ship_phase:
             if not self.is_ai or (self.is_ai and self.turn == 1):
                 Renderer.draw_remaining_ships_to_place(player)
@@ -287,17 +287,21 @@ class Game:
             new_ai_level = Renderer.draw_ai_buttons(self.ai_level)
             if new_ai_level != self.ai_level:
                 self.ai_level = new_ai_level
-                self.is_ai = (self.ai_level > -1)
+                self.is_ai = (self.ai_level > -1) # -1 in the case of PvP
                 if self.is_ai:
                     self.player_name[2] = "Easy AI"  # Update name for AI
                 else:
                     self.player_name[2] = "Player 2"  # Reset name for PvP mode
+
+        # When the powerup_options list is not empty, the player can choose one of them.
+        # Draw the powerup selection buttons.
         elif self.attack_phase and player.powerup_options:
-            # Gets the text to be printed for a specific powerup
+            # Gets the text to be printed for any specific powerup
             label_map = {
                 Powerup.MULTISHOT: "Multishot",
                 Powerup.BIG_SHOT: "Big shot",
                 }
+            # Set the player's powerup choice based on which button they have selected
             player.powerup_choice = Renderer.draw_powerup_buttons(
                     player.powerup_choice,
                     label_map[player.powerup_options[0]],

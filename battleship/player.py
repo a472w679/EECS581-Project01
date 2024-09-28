@@ -115,7 +115,10 @@ class Player:
             self.board.cells[i][j] = MISS_CELL  # Mark the cell with MISS_CELL constant.
             return False, EMPTY_CELL  # Attack was a miss and previous cell was an empty cell.
 
-    def draw_powerup_options(self):
+    def get_new_powerup_options(self):
+        """
+        Randomly get two powerup options. It's a powered up turn.
+        """
         self.powerup_options = [Powerup.MULTISHOT, Powerup.BIG_SHOT]
 
     def is_loss(self):
