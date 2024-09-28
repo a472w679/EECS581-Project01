@@ -35,6 +35,8 @@ class Player:
         self.ships_placed = False  # Indicates if ships have been placed, initialized to False.
         self.powerup_options = []  # The set of powerup options the player has on this turn
         self.powerup_choice = None # The index of the above array that the player selects
+        self.powerup_locked = False# When true, locks the user from selecting the other powerup option
+        self.multishot_coords = [] # For the multishot powerup, store the cells that have been selected
 
     def get_ships(self, num):
         """
@@ -114,6 +116,34 @@ class Player:
             # Attack misses, mark the cell as a miss.
             self.board.cells[i][j] = MISS_CELL  # Mark the cell with MISS_CELL constant.
             return False, EMPTY_CELL  # Attack was a miss and previous cell was an empty cell.
+
+    def get_shots_from_attack(self, i, j):
+        '''
+        Respecting powerups, get the coordinates that are attacked as a result of a click at i, j
+        '''
+        # No powerup on this turn so just return the given coord
+        if not self.powerup_options:
+            return [(i, j)]
+
+        # Multishot. The user can click 7 coords before the list is actually returned
+        if self.powerup_options[self.powerup_choice] == Powerup.MULTISHOT:
+            self.powerup_locked = True
+            if (i, j) in self.multishot_coords:
+                return None
+            self.multishot_coords.append((i, j))
+            if len(self.multishot_coords) == 7:
+                result = self.multishot_coords
+                self.multishot_coords = []
+                return result
+            return None
+
+        # The big shot is a 3 * 3 area around the clicked cell
+        if self.powerup_options[self.powerup_choice] == Powerup.BIG_SHOT:
+            result = [] # return value
+            for y in range(max(i-1, 0), min(i+2, 10)): # clamped i coordinates
+                for x in range(max(j-1, 0), min(j+2, 10)): # clamped j values
+                    result.append((y, x))
+            return result
 
     def get_new_powerup_options(self):
         """

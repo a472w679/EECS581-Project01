@@ -130,19 +130,25 @@ class Game:
         Returns:
             True if the attack was valid, otherwise False.
         '''
-        res, ship_size = enemy.place_attack(i, j)  # Perform the attack on the enemy's board.
-        if ship_size == MISS_CELL:  # Player chose a cell they already missed/hit/sunk
-            self.last_move_message = f"{self.player_name[player.num]} already shot at this cell!"
+
+        # Respecting powerups, get the coordinates that are attacked as a result of this click
+        shots = player.get_shots_from_attack(i, j)
+        if shots is None:  # Multishot powerup may not finish in one click
             return False
 
-        if res and enemy.ship_count[ship_size] == 0:
-            self.last_move_message = f"{self.player_name[player.num]} has sunk a ship!"  # Notifies the player that they sunk a ship.
-        elif res:
-            self.last_move_message = f"{self.player_name[player.num]} has hit a ship!"  # Notifies the player of a successful hit.
-        else:
-            self.last_move_message = f"{self.player_name[player.num]} has missed!"  # Notifies the player of a miss.
-        coord = chr(ord("A") + i) + str(j+1)
-        self.last_move_message += " " + coord
+        hits = 0
+        sinks = 0
+        for shot in shots:
+            res, ship_size = enemy.place_attack(shot[0], shot[1])  # Perform the attack on the enemy's board.
+            if res:
+                hits += 1
+            if res and enemy.ship_count[ship_size] == 0:
+                sinks += 1
+
+        # Report number of hits and sinks to opponent with the last move message
+        self.last_move_message = f"{self.player_name[player.num]} has hit {hits} ship cells"  # Notifies the player of a miss.
+        if sinks > 0:
+            self.last_move_message += f", sinking {sinks} ships"
 
         return True
 
@@ -295,7 +301,7 @@ class Game:
 
         # When the powerup_options list is not empty, the player can choose one of them.
         # Draw the powerup selection buttons.
-        elif self.attack_phase and player.powerup_options:
+        elif self.attack_phase and player.powerup_options and not player.powerup_locked:
             # Gets the text to be printed for any specific powerup
             label_map = {
                 Powerup.MULTISHOT: "Multishot",
