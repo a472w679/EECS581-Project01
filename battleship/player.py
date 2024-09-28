@@ -9,6 +9,12 @@
 from .board import Board  # Importing the Board class from the current package.
 from .board import Orientation
 from .constants import *  # Importing all constants like HIT_CELL and MISS_CELL used for game logic.
+from enum import Enum
+
+class Powerup(Enum):
+    '''Powerup enumeration for powerup types'''
+    MULTISHOT  = 0
+    BIG_SHOT   = 1
 
 class Player:
     def __init__(self, num):
@@ -27,6 +33,8 @@ class Player:
         self.num_ship_cells = 0  # Total number of cells occupied by ships, initialized to 0.
         self.board = Board()  # Initializes a new Board instance for the player.
         self.ships_placed = False  # Indicates if ships have been placed, initialized to False.
+        self.powerup_options = []  # The set of powerup options the player has on this turn
+        self.powerup_choice = None # The index of the above array that the player selects
 
     def get_ships(self, num):
         """
@@ -106,6 +114,9 @@ class Player:
             # Attack misses, mark the cell as a miss.
             self.board.cells[i][j] = MISS_CELL  # Mark the cell with MISS_CELL constant.
             return False, EMPTY_CELL  # Attack was a miss and previous cell was an empty cell.
+
+    def draw_powerup_options(self):
+        self.powerup_options = [Powerup.MULTISHOT, Powerup.BIG_SHOT]
 
     def is_loss(self):
         """

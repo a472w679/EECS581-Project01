@@ -66,6 +66,7 @@ class Renderer:
     def draw_ai_buttons(ai_level):
         '''
         Draws the buttons that player can press to select an AI level or PvP mode
+        Returns the AI level corresponding to the currently selected button, whether that changed or not
         '''
         button_width = 80
         button_height = 50
@@ -99,6 +100,47 @@ class Renderer:
             Renderer.draw_font_text(button_labels[i], int(text_x), 290, 18, BLACK)  # Draw the centered button label
 
         return new_ai_level  # Return the new AI level
+
+    @staticmethod
+    def draw_powerup_buttons(pushed_index, label0, label1):
+        '''
+        Draws the buttons that player can press to select one of their powerups
+        Takes the index of the currently selected button and the text to draw in both buttons
+        Returns the index of the currently selected button, whether that changed or not
+        '''
+        if pushed_index != 1:
+            pushed_index = 0
+
+        button_width = BOARD_PADDING_LEFT - 10 - 50
+        button_height = 50
+        pos = get_mouse_position()  # Get the mouse position from pyray.
+
+        x = WINDOW_WIDTH - BOARD_PADDING_LEFT + 10 + 25
+        # Looping over the 2 buttons
+        for i in range(2):
+            y = int(WINDOW_HEIGHT / 2 + (i - 1) *(button_height + 10) + 10/2)  # x position of button
+            cell = Rectangle(x, y, button_width, button_height)  # bounding box of button
+            draw_rectangle_lines_ex(cell, 3, BLACK)  # draw black outline of button
+
+            # If mouse is hovering over button, shade it light green
+            if (pos.x > x and pos.x < x + button_width and pos.y > y and pos.y < y + button_height):
+                draw_rectangle(x + 3, y + 3, button_width - 6, button_height - 6, Color(143, 188, 143, 100))
+
+                # If the left button is clicked on this frame, this button has been pushed
+                if is_mouse_button_pressed(MouseButton.MOUSE_BUTTON_LEFT):
+                    pushed_index = i
+
+            # If button is selected, shade it gray
+            if i == pushed_index:
+                draw_rectangle(x + 3, y + 3, button_width - 6, button_height - 6, Color(160, 160, 160, 255))
+
+            label = (label0, label1)[i] # Text to be drawn in the button
+            # Center the text in the button
+            text_width = measure_text_ex(Renderer.font, label, 18, 0).x
+            text_x = x + (button_width - text_width) / 2
+            Renderer.draw_font_text(label, int(text_x), y+15, 18, BLACK)  # Draw the centered button label
+
+        return pushed_index  # Return the new AI level
 
     @staticmethod
     def draw_ship_placement_hover(board, ship_length, ship_orientation):

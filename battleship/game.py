@@ -11,6 +11,7 @@ from .renderer import Renderer  # Import the Renderer class for drawing the game
 from .player import Player  # Import the Player class that manages player-specific actions and state.
 from .constants import *  # Import necessary game constants like cell size, colors, etc.
 from .board import Orientation  # Import Orientation enum for ship orientation.
+from .player import Powerup  # Import Powerup enum for powerup selection.
 import random  # Import random module for AI functionality
 
 
@@ -18,6 +19,7 @@ class Game:
     def __init__(self):
         # Initialize game information
         self.turn = 1  # Indicates whose turn it is (1 for Player 1, 2 for Player 2/AI).
+        self.turn_count = 0 # Number of completed turns
         self.player1 = Player(1)  # Create Player 1.
         self.player2 = Player(2)  # Create Player 2 (or AI).
         self.show_own_board = False  # Tracks whether the player is viewing their own board.
@@ -250,6 +252,16 @@ class Game:
 
             if res:
                 self.turn = 3 - self.turn  # Switch turns (1 becomes 2, 2 becomes 1)
+                self.turn_count += 1  # Count this turn as done
+
+                # Give the opponent powerup choices every fourth turn
+                if (self.turn_count // 2) % 4 == 3:
+                    current_enemy_player.draw_powerup_options()
+                else:
+                    current_enemy_player.powerup_options = []
+
+                # Enemy will start with the top powerup choice selected
+                current_enemy_player.powerup_choice = 0
 
     def show_game_end_phase(self):
         losing_player = self.enemy_lookup_table[self.turn]
@@ -266,18 +278,31 @@ class Game:
         Renderer.draw_font_text(self.last_move_message, BOARD_PADDING_LEFT, 370, 20, RED)  # Draw the last move message.
         Renderer.draw_font_text(self.secondary_message, BOARD_PADDING_LEFT, 395, 20, turn_message_color)  # Draw any secondary messages.
         Renderer.draw_font_text(self.color_info, 10, 10, 15, BLACK)  # Draw the ship color legend/info.
+
+        player = self.player_lookup_table[self.turn]
         if self.place_ship_phase:
             if not self.is_ai or (self.is_ai and self.turn == 1):
-                Renderer.draw_remaining_ships_to_place(self.player_lookup_table[self.turn])
+                Renderer.draw_remaining_ships_to_place(player)
         elif self.menu_phase:
             new_ai_level = Renderer.draw_ai_buttons(self.ai_level)
             if new_ai_level != self.ai_level:
                 self.ai_level = new_ai_level
                 self.is_ai = (self.ai_level > -1)
                 if self.is_ai:
-                    self.player_name[2] = f"Easy AI"  # Update name for AI
+                    self.player_name[2] = "Easy AI"  # Update name for AI
                 else:
                     self.player_name[2] = "Player 2"  # Reset name for PvP mode
+        elif self.attack_phase and player.powerup_options:
+            # Gets the text to be printed for a specific powerup
+            label_map = {
+                Powerup.MULTISHOT: "Multishot",
+                Powerup.BIG_SHOT: "Big shot",
+                }
+            player.powerup_choice = Renderer.draw_powerup_buttons(
+                    player.powerup_choice,
+                    label_map[player.powerup_options[0]],
+                    label_map[player.powerup_options[1]]
+            )
 
     def game_loop(self):
         '''
