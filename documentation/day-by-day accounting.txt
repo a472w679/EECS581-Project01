@@ -1,2 +1,3 @@
 9/24 - Implementing AI infrastructure and Easy AI by Christopher Gronewold (2 hours)
 9/24 - GTA meeting (30 min)
+9/28 - Implemented medium and hard difficulty AI (Ethan Dirkes) (3 hours)
