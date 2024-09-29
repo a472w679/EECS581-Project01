@@ -150,6 +150,7 @@ class Player:
         Randomly get two powerup options. It's a powered up turn.
         """
         self.powerup_options = [Powerup.MULTISHOT, Powerup.BIG_SHOT]
+        self.powerup_locked = False
 
     def is_loss(self):
         """
