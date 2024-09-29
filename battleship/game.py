@@ -25,6 +25,7 @@ class Game:
         self.show_own_board = False  # Tracks whether the player is viewing their own board.
         self.is_ai = None  # Initialize to None, will be set when player selects game mode
         self.ai_level = None  # Initialize to None, set to -1 for PvP, 0-2 for AI levels
+        self.ai_hard_last_hit = [0,0]  # Cell that hard AI last hit, begins search from here
         self.ship_orientation = Orientation.HORIZONTAL  # Set initial ship orientation to horizontal.
         self.player_name = {1: "Player", 2: "Player 2"}  # Default names for PvP mode
 
@@ -103,21 +104,60 @@ class Game:
         Returns:
             True if an attack occurred, otherwise False.
         '''
+
+        invalid_cell_types = [HIT_CELL, MISS_CELL, SUNK_CELL]
+
         # Easy AI: Random attack
         if self.ai_level == 0:
             i, j = random.randint(0, 9), random.randint(0, 9)  # Generate random coordinates
-            while not enemy.board.is_valid_cell(i, j) or enemy.board.cells[i][j] in [HIT_CELL, MISS_CELL, SUNK_CELL]:
-                i, j = random.randint(0, 9), random.randint(0,
-                                                            9)  # Generate new coordinates if invalid or already attacked
+            while not enemy.board.is_valid_cell(i, j) or enemy.board.cells[i][j] in invalid_cell_types:
+                i, j = random.randint(0, 9), random.randint(0,9)  # Generate new coordinates if invalid or already attacked
 
-        # Medium AI: TODO
+        # Medium AI: Random attack, or attack orthogonally to hit cell
         elif self.ai_level == 1:
             i, j = 0, 0  # Placeholder
+            found_cell = False  # Whether a cell to hit has been found or not
+            for ship, ship_hits in enemy.ship_hits.items():  # Iterate through each list of hit cells for each ship
+                for cell in ship_hits:  # Iterate through each cell that's been hit per ship
+                    if enemy.board.cells[cell[0]][cell[1]] == HIT_CELL:  # If the cell has been hit, not sunk
+                        for offsetX in range(-1,2):  # X offset from left (-1) to right (1)
+                            for offsetY in range(-1,2):  # Y offset from left (-1) to right (1)
+                                if (offsetX + offsetY) % 2 == 0:  # If the cell is not orthogonal in one direction, skip cell
+                                    continue
+                                if not enemy.board.is_valid_cell(cell[0] + offsetX, cell[1] + offsetY):  # If cell is not valid, skip cell
+                                    continue
+                                if enemy.board.cells[cell[0] + offsetX][cell[1] + offsetY] not in invalid_cell_types:  # If cell is not invalid
+                                    found_cell = True  # Cell has been found
+                                    i,j = cell[0] + offsetX, cell[1] + offsetY  # Mark coordinates to hit
+                                    break
+                            # Break out of loop
+                            if found_cell: break
+                    if found_cell: break
+                if found_cell: break
 
-        # Hard AI: TODO
+
+            # Hit cell not found, attack randomly
+            if not found_cell:
+                i, j = random.randint(0, 9), random.randint(0, 9)  # Generate random coordinates
+                while not enemy.board.is_valid_cell(i, j) or enemy.board.cells[i][j] in invalid_cell_types:
+                    i, j = random.randint(0, 9), random.randint(0,9)  # Generate new coordinates if invalid or already attacked
+
+        # Hard AI: Attack ship every turn
         elif self.ai_level == 2:
-            i, j = 0, 0  # Placeholder
+            found_cell = False
+            i, j = 0, 0  # Initialize coordinates
+            for row in range(self.ai_hard_last_hit[0], 10):  # Loop through rows, starting from last hit
+                for col in range(self.ai_hard_last_hit[1], 10):  # Loop through cols, starting from last hit
+                    if enemy.board.cells[row][col] > 0:  # If the cell is a valid hit
+                        self.ai_hard_last_hit = [row, col]  # Store the current coords as the last hit
+                        i, j = row, col  # Set current row and col as coords to attack
+                        found_cell = True
+                        break
+                if found_cell:  # Hit has been found, break out of loop
+                    break
+                self.ai_hard_last_hit[1] = 0  # End of row has been reached so reset column to 0
 
+        print("attacked: " + str(i) + "," + str(j))
         return self.process_attack(player, enemy, i, j)  # Process the AI's attack
 
     def process_attack(self, player, enemy, i, j):
