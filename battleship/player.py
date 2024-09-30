@@ -18,7 +18,6 @@ class Powerup(Enum):
     BIG_SHOT = 2        # Powerup for a 3x3 area shot
     LINE_SHOT = 3       # Powerup for a 1x10 line shot
     RANDOM_SHOT = 4  # Powerup for 10 random 1x1 shots
-    REVEAL_SHOT = 5      # Powerup to reveal a 2x6 area
 
 class Player:
     def __init__(self, num):
@@ -41,7 +40,6 @@ class Player:
         self.powerup_choice = None      # The index of the above array that the player selects
         self.powerup_locked = False     # When true, locks the user from selecting the other powerup option
         self.multishot_coords = []      # For the multishot powerup, store the cells that have been selected
-        self.revealed_cells = []        # List to store revealed cells from the REVEAL_SHOT powerup
         self.orientation = Orientation.HORIZONTAL  # Default orientation for line shot
 
     def get_ships(self, num):
@@ -172,54 +170,7 @@ class Player:
                 shots.add(shot)     # Add the random coordinate
             return list(shots)      # Return list of random shots
 
-        # Reveal shot. Select a cell to reveal the 2x6 area
-        elif powerup == Powerup.REVEAL_SHOT:
-            for x in range(2):                                                  # Iterate over 2 rows
-                for y in range(6):                                              # Iterate over 6 columns
-                    if i + x < enemy_board.rows and j + y < enemy_board.cols:   # Check if within board bounds
-                        cell = enemy_board.cells[i + x][j + y]                  # Get the cell value
-                        if cell > 0:                                            # If there's a ship
-                            self.revealed_cells.append((i + x, j + y))          # Add to revealed cells
-            return []                                                           # No shots for this powerup, return empty list
 
-    def get_preview_cells(self, i, j, enemy_board):
-        # If no powerup is active, preview only the clicked cell
-        if not self.powerup_options:
-            return [(i, j)]
-
-        # Get the currently selected powerup
-        powerup = self.powerup_options[self.powerup_choice]
-
-        if powerup == Powerup.MULTISHOT:
-            # Preview all selected cells plus the current mouse position
-            return self.multishot_coords + [(i, j)]
-
-        elif powerup == Powerup.BIG_SHOT:
-            # Preview a 3x3 area around the clicked cell, respecting board boundaries
-            return [(y, x) for y in range(max(i-1, 0), min(i+2, enemy_board.rows))
-                           for x in range(max(j-1, 0), min(j+2, enemy_board.cols))]
-
-        elif powerup == Powerup.LINE_SHOT:
-            if self.line_shot_orientation == Orientation.HORIZONTAL:
-                # Preview entire row
-                return [(i, x) for x in range(enemy_board.cols)]
-            else:  # Vertical
-                # Preview entire column
-                return [(y, j) for y in range(enemy_board.rows)]
-
-        elif powerup == Powerup.RANDOM_SHOT:
-            # Preview 10 random cells
-            return [(random.randint(0, enemy_board.rows - 1), random.randint(0, enemy_board.cols - 1)) 
-                    for _ in range(10)]
-
-        elif powerup == Powerup.REVEAL_SHOT:
-            # Preview a 2x6 area starting from the clicked cell, respecting board boundaries
-            return [(i + x, j + y) for x in range(2) for y in range(6)
-                    if i + x < enemy_board.rows and j + y < enemy_board.cols]
-
-        # Default case: preview only the clicked cell
-        return [(i, j)]
-    
     def get_new_powerup_options(self):
         """
         Randomly get two powerup options. It's a powered up turn.

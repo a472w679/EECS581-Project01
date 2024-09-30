@@ -11,7 +11,6 @@ from .constants import *  # Importing all the constants needed for game logic li
 from .board import Orientation  # Importing Orientation enum for ship handling.
 import random  # importing the random module  for ship colors
 
-
 class Renderer:
     # Only one renderer, so we make the methods static
     font = None
@@ -212,7 +211,7 @@ class Renderer:
                 draw_rectangle(BOARD_PADDING_LEFT + j * CELL_SIZE + 3, BOARD_PADDING_TOP + i * CELL_SIZE + 3,
                                CELL_SIZE - 6, CELL_SIZE - 6, cell_color)  # Fill the cell with the color.
 
-            Renderer.draw_ship_placement_hover(board, ship_length, ship_orientation)
+        Renderer.draw_ship_placement_hover(board, ship_length, ship_orientation)
 
     @staticmethod
     def draw_window(game):

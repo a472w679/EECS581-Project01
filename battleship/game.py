@@ -28,6 +28,7 @@ class Game:
         self.ship_orientation = Orientation.HORIZONTAL      # Set initial ship orientation to horizontal.
         self.player_name = {1: "Player", 2: "Player 2"}     # Default names for PvP mode
         self.powerup_selection_phase = False                # Flag for powerup selection phase
+        self.preview_cells = []                             # Store cells to be previewed
 
         # Utility lookup tables for player and enemy references
         self.player_lookup_table = {1: self.player1, 2: self.player2}   # Maps turn number to the current player.
@@ -85,6 +86,17 @@ class Game:
         Returns:
             True if an attack occurred, otherwise False.
         '''
+        # Get the cell coordinates under the mouse cursor
+        i, j = Renderer.get_mouse_board_coordinates()
+
+        # Handle Line Shot rotation
+        key = get_key_pressed()
+        if key == ord('r') and player.powerup_options and player.powerup_options[player.powerup_choice] == Powerup.LINE_SHOT:
+            # Toggle the line shot orientation between horizontal and vertical
+            player.orientation = (Orientation.VERTICAL 
+                if player.orientation == Orientation.HORIZONTAL 
+                else Orientation.HORIZONTAL)
+
         if self.is_ai and self.turn == 2:                           # If it's the AI's turn
             return self.get_ai_attack(player, enemy)                # Use AI attack logic
         i, j = Renderer.get_mouse_board_coordinates()               # Get mouse cursor coordinates on the enemy's board.
@@ -366,7 +378,6 @@ class Game:
                 Powerup.BIG_SHOT: "Big shot",
                 Powerup.LINE_SHOT: "Line shot",
                 Powerup.RANDOM_SHOT: "Random shots",
-                Powerup.REVEAL_SHOT: "Reveal area",
                 }
             # Set the player's powerup choice based on which button they have selected
             player.powerup_choice = Renderer.draw_powerup_buttons(

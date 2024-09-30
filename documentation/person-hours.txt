@@ -4,6 +4,5 @@ Ethan Dirkes - 3 hours
   I built on Chris's AI code to include logic for medium and hard difficulties.
 Chase Entwistle - 5 hours
   I modified the code to handle powerups, allowing multiple coordinates to be attacked in a turn. I also added two powerups, coded the buttons for choosing powerups, and coded the AI difficulty buttons at the start of a game.
-
-Tommy Lam - 3 hours
-  I added special attacks so player can choose which two special attacks to use every 4 turn.
+Tommy Lam - 4 hours
+  I built on Chase powerups to include Line shot and Random shot. Also make it random so it not the same two powerups.
