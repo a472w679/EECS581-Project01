@@ -226,6 +226,7 @@ class Player:
         """
         self.powerup_options = random.sample(list(Powerup), 2)
         self.powerup_choice = 0  # Default to first option
+        self.powerup_locked = False
 
     def is_loss(self):
         """
