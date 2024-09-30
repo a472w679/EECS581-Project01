@@ -2,4 +2,5 @@
 9/24 - GTA meeting (30 min)
 9/28 - Implemented medium and hard difficulty AI (Ethan Dirkes) (3 hours)
 9/29 - Implemented special attack by Tommy Lam (4 hours)
+9/29 - Implemented powerup handling, 2 powurups, and AI difficulty selection buttons by Chase Entwistle (5 hours)
 9/29 - Documentation completed by Zonaid Prithu (3 hours) 
