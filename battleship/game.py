@@ -91,11 +91,13 @@ class Game:
 
         # Handle Line Shot rotation
         key = get_key_pressed()
-        if key == ord('r') and player.powerup_options and player.powerup_options[player.powerup_choice] == Powerup.LINE_SHOT:
-            # Toggle the line shot orientation between horizontal and vertical
-            player.orientation = (Orientation.VERTICAL 
-                if player.orientation == Orientation.HORIZONTAL 
-                else Orientation.HORIZONTAL)
+        if key == ASCII_R and player.powerup_options and player.powerup_choice is not None:
+            if player.powerup_options[player.powerup_choice] == Powerup.LINE_SHOT:
+                player.orientation = (Orientation.VERTICAL 
+                    if player.orientation == Orientation.HORIZONTAL 
+                    else Orientation.HORIZONTAL)
+                # Force update of preview cells after rotation
+                self.preview_cells = player.get_preview_cells(i, j, enemy.board)
             
         # Update preview cells based on current mouse position and active powerup
         self.preview_cells = player.get_preview_cells(i, j, enemy.board)
@@ -313,6 +315,7 @@ class Game:
                 self.last_move_message = "Can't attack! Currently viewing own board!"  # If viewing own board, disallow attacks.
         else:
             Renderer.draw_board(current_enemy_player.board, True, preview_cells=self.preview_cells)               # Draw the enemy player's board.
+            self.get_attack(current_player, current_enemy_player)               # Call this even without mouse click
             res = self.get_attack(current_player, current_enemy_player)         # Perform an attack if allowed.
             if current_enemy_player.is_loss():                                  # Check if the enemy has lost all their ships.
                 self.message = ""                                               # Remove message from the UI.
@@ -381,7 +384,7 @@ class Game:
                 Powerup.BIG_SHOT: "Big shot",
                 Powerup.LINE_SHOT: "Line shot",
                 Powerup.RANDOM_SHOT: "Random shots",
-                Powerup.REVEAL_SHOT: "Reveal area",
+                #Powerup.REVEAL_SHOT: "Reveal area",
                 }
             # Set the player's powerup choice based on which button they have selected
             player.powerup_choice = Renderer.draw_powerup_buttons(

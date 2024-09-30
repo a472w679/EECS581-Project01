@@ -10,6 +10,7 @@
 ASCII_A = 97  # ASCII value for 'a'. (chr(65) == 'a')
 ASCII_0 = 48  # ASCII value for '0'. (chr(48) == '0')
 ASCII_B = 66  # ASCII value for 'b'. (chr(98) == 'b')
+ASCII_R = 114  # ASCII value for 'r'
 
 # Cell and board-related constants
 CELL_SIZE = 28  # The size of each cell in the Battleship game board in pixels.

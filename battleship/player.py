@@ -18,7 +18,7 @@ class Powerup(Enum):
     BIG_SHOT = 2        # Powerup for a 3x3 area shot
     LINE_SHOT = 3       # Powerup for a 1x10 line shot
     RANDOM_SHOT = 4  # Powerup for 10 random 1x1 shots
-    REVEAL_SHOT = 5      # Powerup to reveal a 2x6 area
+    #REVEAL_SHOT = 5      # Powerup to reveal a 2x6 area
 
 class Player:
     def __init__(self, num):
@@ -201,11 +201,11 @@ class Player:
 
         elif powerup == Powerup.LINE_SHOT:
             if self.orientation == Orientation.HORIZONTAL:
-                # Preview entire row
-                return [(i, x) for x in range(enemy_board.cols)]
+                # Return all valid cells in the current row
+                return [(i, x) for x in range(enemy_board.cols) if enemy_board.is_valid_cell(i, x)]
             else:  # Vertical
-                # Preview entire column
-                return [(y, j) for y in range(enemy_board.rows)]
+                # Return all valid cells in the current column
+                return [(y, j) for y in range(enemy_board.rows) if enemy_board.is_valid_cell(y, j)]
 
         elif powerup == Powerup.RANDOM_SHOT:
             # Preview 10 random cells
