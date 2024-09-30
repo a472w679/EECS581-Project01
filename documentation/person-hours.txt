@@ -6,3 +6,5 @@ Chase Entwistle - 5 hours
   I modified the code to handle powerups, allowing multiple coordinates to be attacked in a turn. I also added two powerups, coded the buttons for choosing powerups, and coded the AI difficulty buttons at the start of a game.
 Tommy Lam - 4 hours
   I built on Chase powerups to include Line shot and Random shot. Also make it random so it not the same two powerups.
+Zonaid Prithu - 3 hours
+  I took a bit of time to understand all the methods and how they work, and concurrently wrote up all the documentation for the relevant modules.
