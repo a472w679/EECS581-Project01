@@ -2,3 +2,5 @@ Christopher Gronewold - 3 hours
   I added the structure to the code to handle playing against an AI. I added that and the easy AI difficulty logic.
 Ethan Dirkes - 3 hours
   I built on Chris's AI code to include logic for medium and hard difficulties.
+Chase Entwistle - 5 hours
+  I modified the code to handle powerups, allowing multiple coordinates to be attacked in a turn. I also added two powerups, coded the buttons for choosing powerups, and coded the AI difficulty buttons at the start of a game.
