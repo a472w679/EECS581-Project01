@@ -6,48 +6,48 @@
 # Authors: Xavier and Andrew
 # Creation Date: 9th of September, 2024
 
-from pyray import *  # Import necessary functions from pyray for window and input handling.
+from pyray import *             # Import necessary functions from pyray for window and input handling.
 from .renderer import Renderer  # Import the Renderer class for drawing the game board and window.
-from .player import Player  # Import the Player class that manages player-specific actions and state.
-from .constants import *  # Import necessary game constants like cell size, colors, etc.
+from .player import Player      # Import the Player class that manages player-specific actions and state.
+from .constants import *        # Import necessary game constants like cell size, colors, etc.
 from .board import Orientation  # Import Orientation enum for ship orientation.
-from .player import Powerup  # Import Powerup enum for powerup selection.
-import random  # Import random module for AI functionality
-
+from .player import Powerup     # Import Powerup enum for powerup selection.
+import random                   # Import random module for AI functionality
 
 class Game:
     def __init__(self):
         # Initialize game information
-        self.turn = 1  # Indicates whose turn it is (1 for Player 1, 2 for Player 2/AI).
-        self.turn_count = 0 # Number of completed turns
-        self.player1 = Player(1)  # Create Player 1.
-        self.player2 = Player(2)  # Create Player 2 (or AI).
-        self.show_own_board = False  # Tracks whether the player is viewing their own board.
-        self.is_ai = None  # Initialize to None, will be set when player selects game mode
-        self.ai_level = None  # Initialize to None, set to -1 for PvP, 0-2 for AI levels
-        self.ai_hard_last_hit = [0,0]  # Cell that hard AI last hit, begins search from here
-        self.ship_orientation = Orientation.HORIZONTAL  # Set initial ship orientation to horizontal.
-        self.player_name = {1: "Player", 2: "Player 2"}  # Default names for PvP mode
+        self.turn = 1                                       # Indicates whose turn it is (1 for Player 1, 2 for Player 2/AI).
+        self.turn_count = 0                                 # Number of completed turns
+        self.player1 = Player(1)                            # Create Player 1.
+        self.player2 = Player(2)                            # Create Player 2 (or AI).
+        self.show_own_board = False                         # Tracks whether the player is viewing their own board.
+        self.is_ai = None                                   # Initialize to None, will be set when player selects game mode
+        self.ai_level = None                                # Initialize to None, set to -1 for PvP, 0-2 for AI levels
+        self.ai_hard_last_hit = [0,0]                       # Cell that hard AI last hit, begins search from here
+        self.ship_orientation = Orientation.HORIZONTAL      # Set initial ship orientation to horizontal.
+        self.player_name = {1: "Player", 2: "Player 2"}     # Default names for PvP mode
+        self.powerup_selection_phase = False                # Flag for powerup selection phase
 
         # Utility lookup tables for player and enemy references
-        self.player_lookup_table = {1: self.player1, 2: self.player2}  # Maps turn number to the current player.
-        self.enemy_lookup_table = {1: self.player2, 2: self.player1}  # Maps turn number to the enemy player.
+        self.player_lookup_table = {1: self.player1, 2: self.player2}   # Maps turn number to the current player.
+        self.enemy_lookup_table = {1: self.player2, 2: self.player1}    # Maps turn number to the enemy player.
 
         # Game phase states
-        self.menu_phase = True  # Start the game in the menu phase.
-        self.mode_selection_phase = True  # Phase for selecting game mode
-        self.ship_selection_phase = False  # Phase for selecting number of ships
-        self.place_ship_phase = False  # Ship placement phase will activate after the menu.
-        self.attack_phase = False  # Attack phase will activate once both players have placed their ships.
-        self.game_end_phase = False  # Game end phase will show the board that lost and their sunk ships
+        self.menu_phase = True              # Start the game in the menu phase.
+        self.mode_selection_phase = True    # Phase for selecting game mode
+        self.ship_selection_phase = False   # Phase for selecting number of ships
+        self.place_ship_phase = False       # Ship placement phase will activate after the menu.
+        self.attack_phase = False           # Attack phase will activate once both players have placed their ships.
+        self.game_end_phase = False         # Game end phase will show the board that lost and their sunk ships
 
         # Game messages to display during different phases
-        self.message = ""  # Used later for player turn information
-        self.title = "Select Game Type, Then Type Ship Amount (1-5)"  # Initial message for the ship selection phase.
-        self.win_message = ""  # The message to display when a player wins.
-        self.last_move_message = ""  # Message for showing the result of the last move (hit/miss).
-        self.secondary_message = ""  # Secondary message for additional information.
-        self.color_info = SHIP_COLOR_INFO  # Display ship color legend/info.
+        self.message = ""                                               # Used later for player turn information
+        self.title = "Select Game Type, Then Type Ship Amount (1-5)"    # Initial message for the ship selection phase.
+        self.win_message = ""                                           # The message to display when a player wins.
+        self.last_move_message = ""                                     # Message for showing the result of the last move (hit/miss).
+        self.secondary_message = ""                                     # Secondary message for additional information.
+        self.color_info = SHIP_COLOR_INFO                               # Display ship color legend/info.
 
     def get_placement(self, player):
         '''
@@ -55,20 +55,20 @@ class Game:
         Args:
             player: The player placing their ships.
         '''
-        i, j = Renderer.get_mouse_board_coordinates()  # Get mouse cursor coordinates on the board.
+        i, j = Renderer.get_mouse_board_coordinates()               # Get mouse cursor coordinates on the board.
 
         if is_mouse_button_pressed(MouseButton.MOUSE_BUTTON_LEFT):  # Check if the left mouse button was clicked.
             res = player.place_ship(i, j, player.ships[-1],
-                                    self.ship_orientation)  # Attempt to place the player's last remaining ship at the coordinates.
+                                    self.ship_orientation)          # Attempt to place the player's last remaining ship at the coordinates.
             if not res:
                 self.last_move_message = "Not a correct placement!"  # If the placement failed, show an error message.
             else:
-                self.last_move_message = ""  # Reset the last move message.
-                player.ships.pop()  # Remove the placed ship from the player's list.
+                self.last_move_message = ""                         # Reset the last move message.
+                player.ships.pop()                                  # Remove the placed ship from the player's list.
 
         if is_mouse_button_pressed(MouseButton.MOUSE_BUTTON_RIGHT):  # Check if right mouse button was clicked.
-            if (self.ship_orientation is Orientation.HORIZONTAL):  # Check if orientation is currently horizontal
-                self.ship_orientation = Orientation.VERTICAL  # If horizontal, go vertical
+            if (self.ship_orientation is Orientation.HORIZONTAL):   # Check if orientation is currently horizontal
+                self.ship_orientation = Orientation.VERTICAL        # If horizontal, go vertical
             else:
                 self.ship_orientation = Orientation.HORIZONTAL  # Otherwise, go horizontal (flip)
 
@@ -85,13 +85,12 @@ class Game:
         Returns:
             True if an attack occurred, otherwise False.
         '''
-        if self.is_ai and self.turn == 2:  # If it's the AI's turn
-            return self.get_ai_attack(player, enemy)  # Use AI attack logic
-
-        i, j = Renderer.get_mouse_board_coordinates()  # Get mouse cursor coordinates on the enemy's board.
+        if self.is_ai and self.turn == 2:                           # If it's the AI's turn
+            return self.get_ai_attack(player, enemy)                # Use AI attack logic
+        i, j = Renderer.get_mouse_board_coordinates()               # Get mouse cursor coordinates on the enemy's board.
         if is_mouse_button_pressed(MouseButton.MOUSE_BUTTON_LEFT):  # Check if the left mouse button was clicked.
-            if enemy.board.is_valid_cell(i, j):  # Ensure the clicked cell is valid for an attack.
-                return self.process_attack(player, enemy, i, j)  # Process the attack
+            if enemy.board.is_valid_cell(i, j):                     # Ensure the clicked cell is valid for an attack.
+                return self.process_attack(player, enemy, i, j)     # Process the attack
 
         return False
 
@@ -146,11 +145,11 @@ class Game:
         elif self.ai_level == 2:
             found_cell = False
             i, j = 0, 0  # Initialize coordinates
-            for row in range(self.ai_hard_last_hit[0], 10):  # Loop through rows, starting from last hit
-                for col in range(self.ai_hard_last_hit[1], 10):  # Loop through cols, starting from last hit
-                    if enemy.board.cells[row][col] > 0:  # If the cell is a valid hit
-                        self.ai_hard_last_hit = [row, col]  # Store the current coords as the last hit
-                        i, j = row, col  # Set current row and col as coords to attack
+            for row in range(self.ai_hard_last_hit[0], 10):         # Loop through rows, starting from last hit
+                for col in range(self.ai_hard_last_hit[1], 10):     # Loop through cols, starting from last hit
+                    if enemy.board.cells[row][col] > 0:             # If the cell is a valid hit
+                        self.ai_hard_last_hit = [row, col]          # Store the current coords as the last hit
+                        i, j = row, col                             # Set current row and col as coords to attack
                         found_cell = True
                         break
                 if found_cell:  # Hit has been found, break out of loop
@@ -172,7 +171,7 @@ class Game:
         '''
 
         # Respecting powerups, get the coordinates that are attacked as a result of this click
-        shots = player.get_shots_from_attack(i, j)
+        shots = player.get_shots_from_attack(i, j, enemy.board)
         if shots is None:  # Multishot powerup may not finish in one click
             return False
 
@@ -208,14 +207,14 @@ class Game:
                     self.player_name[2] = f"{'Easy' if self.ai_level == 0 else 'AI'} AI"
             return  # Wait for player to select game mode
 
-        key = get_key_pressed() - ASCII_0  # Get the key the user pressed and adjust it to a numeric value.
-        if key > 0 and key <= 5:  # Ensure the ship count is between 1 and 5.
-            self.player1.get_ships(key)  # Give Player 1 the specified number of ships.
-            self.player2.get_ships(key)  # Give Player 2 the same number of ships.
-            self.message = f"{self.player_name[1]}'s Turn to Place Ships"  # Update the message to indicate the next phase.
-            self.menu_phase = False  # Exit the menu phase.
-            self.place_ship_phase = True  # Enter the ship placement phase.
-            self.title = ""  # Remove title line from the screen
+        key = get_key_pressed() - ASCII_0                                   # Get the key the user pressed and adjust it to a numeric value.
+        if key > 0 and key <= 5:                                            # Ensure the ship count is between 1 and 5.
+            self.player1.get_ships(key)                                     # Give Player 1 the specified number of ships.
+            self.player2.get_ships(key)                                     # Give Player 2 the same number of ships.
+            self.message = f"{self.player_name[1]}'s Turn to Place Ships"   # Update the message to indicate the next phase.
+            self.menu_phase = False                                         # Exit the menu phase.
+            self.place_ship_phase = True                                    # Enter the ship placement phase.
+            self.title = ""                                                 # Remove title line from the screen
 
             if self.is_ai:
                 self.place_ai_ships()  # Place AI ships randomly
@@ -245,60 +244,60 @@ class Game:
                             self.ship_orientation)  # Draw the current player's board.
 
         if not self.is_ai or (self.is_ai and self.turn == 1):
-            self.get_placement(current_player)  # Handle ship placement for the current player.
+            self.get_placement(current_player)                             # Handle ship placement for the current player.
 
-        if self.player1.ships_placed:  # If Player 1 has placed all ships:
+        if self.player1.ships_placed:                                      # If Player 1 has placed all ships:
             self.message = f"{self.player_name[2]}'s Turn to Place Ships"  # Update the message for Player 2's/AI's turn.
-            self.turn = 2  # Switch the turn to Player 2/AI.
+            self.turn = 2                                                  # Switch the turn to Player 2/AI.
         else:
-            self.turn = 1  # Otherwise, it's still Player 1's turn.
+            self.turn = 1                                                  # Otherwise, it's still Player 1's turn.
 
-        if self.player1.ships_placed and self.player2.ships_placed:  # Once both players have placed all ships:
-            self.place_ship_phase = False  # Exit the ship placement phase.
-            self.attack_phase = True  # Enter the attack phase.
+        if self.player1.ships_placed and self.player2.ships_placed:         # Once both players have placed all ships:
+            self.place_ship_phase = False                                   # Exit the ship placement phase.
+            self.attack_phase = True                                        # Enter the attack phase.
             self.secondary_message = "Viewing ENEMY'S Board [B to Switch]"  # Display instruction for viewing the player's own board.
 
     def toggle_show_board(self):
         '''
         Toggles the display between the player's own board and the enemy's board.
         '''
-        key = get_key_pressed()  # Get the key pressed by the user.
-        if key == ASCII_B:  # If the user presses the 'B' key:
-            if self.show_own_board:  # If the player is currently viewing their own board:
+        key = get_key_pressed()                                                 # Get the key pressed by the user.
+        if key == ASCII_B:                                                      # If the user presses the 'B' key:
+            if self.show_own_board:                                             # If the player is currently viewing their own board:
                 self.secondary_message = "Viewing ENEMY'S Board [B to Switch]"  # Update the message for viewing the enemy board.
-                self.show_own_board = False  # Switch to viewing the enemy board.
+                self.show_own_board = False                                     # Switch to viewing the enemy board.
             else:
                 self.secondary_message = "Viewing OWN Board [B to Switch]"  # Update the message for viewing own board.
-                self.show_own_board = True  # Switch to viewing own board.
+                self.show_own_board = True                                  # Switch to viewing own board.
 
     def show_attack_phase(self):
         '''
         Manages the attack phase where players take turns attacking each other.
         '''
-        self.toggle_show_board()  # Toggle the board view between the player's own and enemy's board.
-        self.message = f"{self.player_name[self.turn]}'s Turn to Attack"  # Update the message to indicate whose turn it is.
+        self.toggle_show_board()                                            # Toggle the board view between the player's own and enemy's board.
+        self.message = f"{self.player_name[self.turn]}'s Turn to Attack"    # Update the message to indicate whose turn it is.
 
-        current_player = self.player_lookup_table[self.turn]  # Get the current attacking player.
-        current_enemy_player = self.enemy_lookup_table[self.turn]  # Get the current enemy player.
+        current_player = self.player_lookup_table[self.turn]                # Get the current attacking player.
+        current_enemy_player = self.enemy_lookup_table[self.turn]           # Get the current enemy player.
         if self.show_own_board:
-            Renderer.draw_board(current_player.board, False)  # Draw the current player's own board.
+            Renderer.draw_board(current_player.board, False)                # Draw the current player's own board.
             if is_mouse_button_pressed(MouseButton.MOUSE_BUTTON_LEFT):
                 self.last_move_message = "Can't attack! Currently viewing own board!"  # If viewing own board, disallow attacks.
         else:
-            Renderer.draw_board(current_enemy_player.board, True)  # Draw the enemy player's board.
-            res = self.get_attack(current_player, current_enemy_player)  # Perform an attack if allowed.
-            if current_enemy_player.is_loss():  # Check if the enemy has lost all their ships.
-                self.message = ""  # Remove message from the UI.
-                self.last_move_message = ""  # Remove the last move message from UI.
-                self.secondary_message = ""  # Remove the secondary message from UI.
-                self.win_message = f"{self.player_name[self.turn]} Has Won!"  # Declare the winner.
-                self.attack_phase = False  # End the attack phase.
-                self.game_end_phase = True  # Set phase to game end
+            Renderer.draw_board(current_enemy_player.board, True)               # Draw the enemy player's board.
+            res = self.get_attack(current_player, current_enemy_player)         # Perform an attack if allowed.
+            if current_enemy_player.is_loss():                                  # Check if the enemy has lost all their ships.
+                self.message = ""                                               # Remove message from the UI.
+                self.last_move_message = ""                                     # Remove the last move message from UI.
+                self.secondary_message = ""                                     # Remove the secondary message from UI.
+                self.win_message = f"{self.player_name[self.turn]} Has Won!"    # Declare the winner.
+                self.attack_phase = False                                       # End the attack phase.
+                self.game_end_phase = True                                      # Set phase to game end
                 return
 
             if res:
-                self.turn = 3 - self.turn  # Switch turns (1 becomes 2, 2 becomes 1)
-                self.turn_count += 1  # Count this turn as done
+                self.turn = 3 - self.turn   # Switch turns (1 becomes 2, 2 becomes 1)
+                self.turn_count += 1        # Count this turn as done
 
                 # Give the opponent powerup choices every fourth turn
                 if (self.turn_count // 2) % 4 == 3:
@@ -318,12 +317,12 @@ class Game:
         Draws informational messages below the game board.
         '''
         turn_message_color = BLUE if self.turn == 1 else GREEN
-        Renderer.draw_font_text(self.message, BOARD_PADDING_LEFT, 34, 22, turn_message_color)  # draw turn-based message
-        Renderer.draw_font_text(self.title, 70, 175, 30, BLACK)  # Draw the main message.
-        Renderer.draw_font_text(self.win_message, 235, 370, 30, turn_message_color)  # Draw the win message.
-        Renderer.draw_font_text(self.last_move_message, BOARD_PADDING_LEFT, 370, 20, RED)  # Draw the last move message.
-        Renderer.draw_font_text(self.secondary_message, BOARD_PADDING_LEFT, 395, 20, turn_message_color)  # Draw any secondary messages.
-        Renderer.draw_font_text(self.color_info, 10, 10, 15, BLACK)  # Draw the ship color legend/info.
+        Renderer.draw_font_text(self.message, BOARD_PADDING_LEFT, 34, 22, turn_message_color)               # draw turn-based message
+        Renderer.draw_font_text(self.title, 70, 175, 30, BLACK)                                             # Draw the main message.
+        Renderer.draw_font_text(self.win_message, 235, 370, 30, turn_message_color)                         # Draw the win message.
+        Renderer.draw_font_text(self.last_move_message, BOARD_PADDING_LEFT, 370, 20, RED)                   # Draw the last move message.
+        Renderer.draw_font_text(self.secondary_message, BOARD_PADDING_LEFT, 395, 20, turn_message_color)    # Draw any secondary messages.
+        Renderer.draw_font_text(self.color_info, 10, 10, 15, BLACK)                                         # Draw the ship color legend/info.
 
         player = self.player_lookup_table[self.turn] # The player currently playing
         if self.place_ship_phase:
@@ -346,6 +345,9 @@ class Game:
             label_map = {
                 Powerup.MULTISHOT: "Multishot",
                 Powerup.BIG_SHOT: "Big shot",
+                Powerup.LINE_SHOT: "Line shot",
+                Powerup.RANDOM_SHOT: "Random shots",
+                Powerup.REVEAL_SHOT: "Reveal area",
                 }
             # Set the player's powerup choice based on which button they have selected
             player.powerup_choice = Renderer.draw_powerup_buttons(
@@ -358,12 +360,12 @@ class Game:
         '''
         The main game loop. This function is continuously called to update the game state.
         '''
-        self.draw_info_messages()  # Draw the game messages.
+        self.draw_info_messages()           # Draw the game messages.
         if self.menu_phase:
-            self.show_menu()  # Show the menu phase.
+            self.show_menu()                # Show the menu phase.
         elif self.place_ship_phase:
-            self.show_place_ship_phase()  # Show the ship placement phase.
+            self.show_place_ship_phase()    # Show the ship placement phase.
         elif self.attack_phase:
-            self.show_attack_phase()  # Show the attack phase.
+            self.show_attack_phase()        # Show the attack phase.
         elif self.game_end_phase:
             self.show_game_end_phase()
