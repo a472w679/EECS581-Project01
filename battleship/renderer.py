@@ -162,7 +162,16 @@ class Renderer:
                                CELL_SIZE - 6, CELL_SIZE - 6, Color(143, 188, 143, 100))
 
     @staticmethod
-    def draw_board(board, is_other_player, ship_length=1, ship_orientation=None):
+    def draw_powerup_preview(board, preview_cells):
+        for i, j in preview_cells:
+            if board.is_valid_cell(i, j):
+                draw_rectangle(BOARD_PADDING_LEFT + j * CELL_SIZE + 3,
+                            BOARD_PADDING_TOP + i * CELL_SIZE + 3,
+                            CELL_SIZE - 6, CELL_SIZE - 6,
+                            Color(255, 255, 0, 100))  # Semi-transparent yellow for powerup preview
+                
+    @staticmethod
+    def draw_board(board, is_other_player, ship_length=1, ship_orientation=None, preview_cells=[]):
         '''
         Draws the game board on the screen.
         - The visual appearance of each cell depends on its state (empty, hit, miss, or contains a ship).
@@ -211,7 +220,12 @@ class Renderer:
                 draw_rectangle(BOARD_PADDING_LEFT + j * CELL_SIZE + 3, BOARD_PADDING_TOP + i * CELL_SIZE + 3,
                                CELL_SIZE - 6, CELL_SIZE - 6, cell_color)  # Fill the cell with the color.
 
-        Renderer.draw_ship_placement_hover(board, ship_length, ship_orientation)
+        # Draw powerup preview
+        Renderer.draw_powerup_preview(board, preview_cells)
+
+        # Draw ship placement hover only if it's not the other player's board and we're placing ships
+        if not is_other_player and ship_length > 1:
+            Renderer.draw_ship_placement_hover(board, ship_length, ship_orientation)
 
     @staticmethod
     def draw_window(game):

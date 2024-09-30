@@ -96,6 +96,9 @@ class Game:
             player.orientation = (Orientation.VERTICAL 
                 if player.orientation == Orientation.HORIZONTAL 
                 else Orientation.HORIZONTAL)
+            
+        # Update preview cells based on current mouse position and active powerup
+        self.preview_cells = player.get_preview_cells(i, j, enemy.board)
 
         if self.is_ai and self.turn == 2:                           # If it's the AI's turn
             return self.get_ai_attack(player, enemy)                # Use AI attack logic
@@ -309,7 +312,7 @@ class Game:
             if is_mouse_button_pressed(MouseButton.MOUSE_BUTTON_LEFT):
                 self.last_move_message = "Can't attack! Currently viewing own board!"  # If viewing own board, disallow attacks.
         else:
-            Renderer.draw_board(current_enemy_player.board, True)               # Draw the enemy player's board.
+            Renderer.draw_board(current_enemy_player.board, True, preview_cells=self.preview_cells)               # Draw the enemy player's board.
             res = self.get_attack(current_player, current_enemy_player)         # Perform an attack if allowed.
             if current_enemy_player.is_loss():                                  # Check if the enemy has lost all their ships.
                 self.message = ""                                               # Remove message from the UI.
@@ -378,6 +381,7 @@ class Game:
                 Powerup.BIG_SHOT: "Big shot",
                 Powerup.LINE_SHOT: "Line shot",
                 Powerup.RANDOM_SHOT: "Random shots",
+                Powerup.REVEAL_SHOT: "Reveal area",
                 }
             # Set the player's powerup choice based on which button they have selected
             player.powerup_choice = Renderer.draw_powerup_buttons(
